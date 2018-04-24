@@ -134,7 +134,7 @@ class Cognito(object):
     group_class = GroupObj
 
     def __init__(
-            self, user_pool_id, client_id,
+            self, user_pool_id, client_id, user_pool_region=None,
             username=None, id_token=None, refresh_token=None,
             access_token=None, client_secret=None,
             access_key=None, secret_key=None,
@@ -142,6 +142,7 @@ class Cognito(object):
         """
         :param user_pool_id: Cognito User Pool ID
         :param client_id: Cognito User Pool Application client ID
+        :param user_pool_region: Cognito User Pool region name
         :param username: User Pool username
         :param id_token: ID Token returned by authentication
         :param refresh_token: Refresh Token returned by authentication
@@ -149,10 +150,9 @@ class Cognito(object):
         :param access_key: AWS IAM access key
         :param secret_key: AWS IAM secret key
         """
-
+        self.user_pool_region = self.user_pool_id.split('_')[0] if user_pool_region is None else user_pool_region
         self.user_pool_id = user_pool_id
         self.client_id = client_id
-        self.user_pool_region = self.user_pool_id.split('_')[0]
         self.username = username
         self.id_token = id_token
         self.access_token = access_token
@@ -268,11 +268,11 @@ class Cognito(object):
     def add_custom_attributes(self, **kwargs):
         custom_key = 'custom'
         custom_attributes = {}
-        
+
         for old_key, value in kwargs.items():
             new_key = custom_key + ':' + old_key
             custom_attributes[new_key] = value
-        
+
         self.custom_attributes = custom_attributes
 
     def register(self, username, password, attr_map=None):
@@ -661,4 +661,3 @@ class Cognito(object):
         response = self.client.list_groups(UserPoolId=self.user_pool_id)
         return [self.get_group_obj(group_data)
                 for group_data in response.get('Groups')]
-
